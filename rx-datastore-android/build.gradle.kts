@@ -59,12 +59,11 @@ dependencies {
     androidTestImplementation("androidx.test:rules:1.3.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.2")
 }
-/*
 plugins.withType<com.vanniktech.maven.publish.MavenPublishBasePlugin>() {
     group = "io.github.yuriykulikov"
     version = "1.0.0"
     mavenPublishing {
-        publishToMavenCentral(SonatypeHost.S01)
+        publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.S01)
 
         // Will only apply to non snapshot builds.
         signAllPublications()
@@ -93,6 +92,25 @@ plugins.withType<com.vanniktech.maven.publish.MavenPublishBasePlugin>() {
                 connection.value("scm:git:git://github.com/yuriykulikov/rx-datastore-android.git")
                 developerConnection.value("scm:git:ssh://git@github.com/yuriykulikov/rx-datastore-android.git")
             }
+
+
+            withXml {
+                val dependenciesNode = asNode().appendNode("dependencies")
+
+                listOf("compile", "implementation", "api").forEach { depName ->
+                    project.configurations[depName].dependencies
+                            .filter {
+                                it.group != null && it.version != null && it.name != "unspecified"
+                            }
+                            .forEach {
+                                val dependencyNode = dependenciesNode.appendNode("dependency")
+                                dependencyNode.appendNode("groupId", it.group)
+                                dependencyNode.appendNode("artifactId", it.name)
+                                dependencyNode.appendNode("version", it.version)
+                                dependencyNode.appendNode("scope", depName)
+                            }
+                }
+            }
         }
     }
-}*/
+}
